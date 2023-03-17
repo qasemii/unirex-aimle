@@ -53,7 +53,7 @@ class LanguageModel(BaseModel):
                  a2r: bool = False, a2r_wt: float = 0.0, a2r_criterion: str = None, a2r_task_out: str = None,
                  save_outputs: bool = False, exp_id: str = None,
                  measure_attrs_runtime: bool = False,
-                 e2e: bool = False,
+                 e2e: bool = True,
                  **kwargs):
 
         super().__init__()
@@ -297,6 +297,8 @@ class LanguageModel(BaseModel):
 
         self.measure_attrs_runtime = measure_attrs_runtime
 
+        self.e2e = e2e
+
     def calc_attrs(self, input_ids, attn_mask, targets, rationale=None, noisy_rationale=None):
         # Compute attrs via grad-based attr algo
         if self.attr_dict['explainer_type'] == 'attr_algo' and self.attr_dict['attr_algo'] in attr_algos.keys():
@@ -448,7 +450,7 @@ class LanguageModel(BaseModel):
             batch_size = int(batch_size / self.num_classes)
 
         prev_end = 0
-        if e2e:
+        if self.e2e:
             expls = torch.stack([self.select_k_model(attrs) for k in topk]).reshape(-1, max_length)  # stack the results
         else:
             expls = torch.stack([calc_expl(attrs, k, attn_mask) for k in topk]).reshape(-1, max_length)
@@ -900,7 +902,7 @@ class LanguageModel(BaseModel):
 
     def configure_optimizers(self):
         optimizer_params = setup_optimizer_params(self.model_dict, self.optimizer, self.explainer_type,
-                                                  self.attr_dict['attr_pooling'], self.a2r)
+                                                  self.attr_dict['attr_pooling'], self.a2r, self.e2e)
         self.optimizer['lr'] = self.optimizer['lr'] * self.trainer.world_size
         optimizer = instantiate(
             self.optimizer, params=optimizer_params,

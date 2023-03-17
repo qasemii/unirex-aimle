@@ -3,7 +3,7 @@ from transformers import get_scheduler
 no_decay = ['bias', 'LayerNorm.weight']
 
 
-def setup_optimizer_params(model_dict, optimizer, explainer_type, attr_pooling=None, a2r=False):
+def setup_optimizer_params(model_dict, optimizer, explainer_type, attr_pooling=None, a2r=False, e2e=False):
     optimizer_parameters = [
         {
             'params': [p for n, p in model_dict['task_encoder'].named_parameters() if not any(nd in n for nd in no_decay)],
@@ -23,15 +23,6 @@ def setup_optimizer_params(model_dict, optimizer, explainer_type, attr_pooling=N
         },
 
     ]
-
-    # adding imle layer to be optimized
-    if e2e:
-        optimizer_parameters += [
-            {
-                'params': [p for n, p in model_dict['select_k'].named_parameters() if any(nd in n for nd in no_decay)],
-                'weight_decay': 0.0,
-            },
-        ]
 
     if explainer_type == 'lm':
         optimizer_parameters += [
@@ -95,6 +86,15 @@ def setup_optimizer_params(model_dict, optimizer, explainer_type, attr_pooling=N
             },
             {
                 'params': [p for n, p in model_dict['a2r_task_head'].named_parameters() if any(nd in n for nd in no_decay)],
+                'weight_decay': 0.0,
+            },
+        ]
+
+    # adding imle layer to be optimized
+    if e2e:
+        optimizer_parameters += [
+            {
+                'params': [p for n, p in model_dict['select_k'].named_parameters() if any(nd in n for nd in no_decay)],
                 'weight_decay': 0.0,
             },
         ]
