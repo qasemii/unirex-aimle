@@ -3,7 +3,7 @@ from torch import Tensor
 from typing import Callable
 
 
-def my_calc_expl(attrs: Tensor, k: int, min_val: float = -1e10) -> Tensor:
+def top_k_perecent(attrs: Tensor, k: int, min_val: float = -1e10) -> Tensor:
     attn_mask = attrs.bool().int()
     num_tokens = torch.sum(attn_mask, dim=1) - 1  # don't include CLS token when computing num_tokens
     num_highlight_tokens = torch.round(num_tokens * k / 100)
