@@ -21,29 +21,38 @@ def setup_optimizer_params(model_dict, optimizer, explainer_type, attr_pooling=N
             'params': [p for n, p in model_dict['task_head'].named_parameters() if any(nd in n for nd in no_decay)],
             'weight_decay': 0.0,
         },
-        {
-            'params': [p for n, p in model_dict['select_k'].named_parameters() if any(nd in n for nd in no_decay)],
-            'weight_decay': 0.0,
-        },
 
     ]
+
+    # adding imle layer to be optimized
+    if e2e:
+        optimizer_parameters += [
+            {
+                'params': [p for n, p in model_dict['select_k'].named_parameters() if any(nd in n for nd in no_decay)],
+                'weight_decay': 0.0,
+            },
+        ]
 
     if explainer_type == 'lm':
         optimizer_parameters += [
             {
-                'params': [p for n, p in model_dict['expl_encoder'].named_parameters() if not any(nd in n for nd in no_decay)],
+                'params': [p for n, p in model_dict['expl_encoder'].named_parameters() if
+                           not any(nd in n for nd in no_decay)],
                 'weight_decay': optimizer.weight_decay,
             },
             {
-                'params': [p for n, p in model_dict['expl_encoder'].named_parameters() if any(nd in n for nd in no_decay)],
+                'params': [p for n, p in model_dict['expl_encoder'].named_parameters() if
+                           any(nd in n for nd in no_decay)],
                 'weight_decay': 0.0,
             },
             {
-                'params': [p for n, p in model_dict['expl_head'].named_parameters() if not any(nd in n for nd in no_decay)],
+                'params': [p for n, p in model_dict['expl_head'].named_parameters() if
+                           not any(nd in n for nd in no_decay)],
                 'weight_decay': optimizer.weight_decay,
             },
             {
-                'params': [p for n, p in model_dict['expl_head'].named_parameters() if any(nd in n for nd in no_decay)],
+                'params': [p for n, p in model_dict['expl_head'].named_parameters() if
+                           any(nd in n for nd in no_decay)],
                 'weight_decay': 0.0,
             },
         ]
