@@ -69,3 +69,5 @@ save_outputs: False
 exp_id: null
 
 measure_attrs_runtime: False
+
+e2e: False
