@@ -25,9 +25,8 @@ from src.utils.optim import setup_optimizer_params, setup_scheduler, freeze_laye
 from src.utils.logging import log_step_losses, log_step_metrics, log_epoch_losses, log_epoch_metrics
 from src.utils.solvers import top_k_perecent
 
-from imle.imle import imle
-from imle.target import TargetDistribution
-from imle.noise import SumOfGammaNoiseDistribution
+from imle.aimle import aimle
+from imle.target import AdaptiveTargetDistribution
 
 
 class LanguageModel(BaseModel):
@@ -229,21 +228,10 @@ class LanguageModel(BaseModel):
         # initializing differentiable select_k model
         # ##########################################
         if e2e:
-            nb_samples = 1
-            imle_input_temp = 0.0
-            imle_output_temp = 10.0
-            imle_lambda = 1000.0
-            gradient_scaling = False
+            # The initial perturbation size is set to 0.0, and automatically tuned by the model during training
+            target_distribution = AdaptiveTargetDistribution(initial_alpha=1.0, initial_beta=0.0)
 
-            target_distribution = TargetDistribution(alpha=1.0, beta=imle_lambda, do_gradient_scaling=gradient_scaling)
-            noise_distribution = SumOfGammaNoiseDistribution(k=5, nb_iterations=10, device='cuda')
-
-            @imle(
-                nb_samples=nb_samples,
-                target_distribution=target_distribution,
-                noise_distribution=noise_distribution,
-                theta_noise_temperature=imle_input_temp,
-                target_noise_temperature=imle_output_temp)
+            @aimle(target_distribution=target_distribution)
             def imle_select_k(attrs) -> Tensor:
                 return top_k_perecent(attrs, 10)
 
