@@ -14,7 +14,7 @@ def select_k(logits: Tensor, k: int) -> Tensor:
     return mask
 
 
-def mathias_select_k(logits: Tensor, select_k: int) -> Tensor:
-    scores, indices = torch.topk(logits, select_k, sorted=True)
+def mathias_select_k(logits: Tensor, k: int) -> Tensor:
+    scores, indices = torch.topk(logits, k, sorted=True)
     thr_2d = scores[:, -1].view(-1, 1)
     return (logits >= thr_2d).float()

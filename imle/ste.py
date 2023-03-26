@@ -5,7 +5,7 @@ import functools
 import torch
 from torch import Tensor
 
-from imle.imle import BaseNoiseDistribution
+from imle.noise import BaseNoiseDistribution
 
 from typing import Optional, Callable
 

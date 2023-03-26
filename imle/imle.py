@@ -148,8 +148,8 @@ def imle(function: Optional[Callable[[Tensor], Tensor]] = None,
 
                 # [BATCH_SIZE * N_TOTAL_SAMPLES, ...]
                 theta_2d = theta.view(batch_size, 1, -1).repeat(1, nb_total_samples, 1).view(dy_shape)
-                # θ' = θ - λ dy
 
+                # θ' = θ - λ dy
                 target_theta_2d = target_distribution.params(theta_2d, dy, _is_minimization=_is_minimization)
 
                 # [BATCH_SIZE, N_TOTAL_SAMPLES, ...]
@@ -164,9 +164,10 @@ def imle(function: Optional[Callable[[Tensor], Tensor]] = None,
                 # [BATCH_SIZE * N_TOTAL_SAMPLES, ...]
                 perturbed_target_theta_2d = perturbed_target_theta_3d.view(dy_shape)
 
-                # z' = MAP(θ' + ε)
-                # [BATCH_SIZE * N_TOTAL_SAMPLES, ...]
-                z_prime_2d = function(perturbed_target_theta_2d)
+                with torch.inference_mode():
+                    # z' = MAP(θ' + ε)
+                    # [BATCH_SIZE * N_TOTAL_SAMPLES, ...]
+                    z_prime_2d = function(perturbed_target_theta_2d)
 
                 # [BATCH_SIZE, N_TOTAL_SAMPLES, ...]
                 z_prime_3d = z_prime_2d.view(noise_shape)
