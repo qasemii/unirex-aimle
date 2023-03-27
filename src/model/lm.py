@@ -52,7 +52,7 @@ class LanguageModel(BaseModel):
                  a2r: bool = False, a2r_wt: float = 0.0, a2r_criterion: str = None, a2r_task_out: str = None,
                  save_outputs: bool = False, exp_id: str = None,
                  measure_attrs_runtime: bool = False,
-                 e2e: bool = True,
+                 e2e: bool = False,
                  **kwargs):
 
         super().__init__()
