@@ -231,15 +231,6 @@ class LanguageModel(BaseModel):
             # The initial perturbation size is set to 0.0, and automatically tuned by the model during training
             target_distribution = AdaptiveTargetDistribution(initial_alpha=1.0, initial_beta=0.0)
 
-            @aimle(target_distribution=target_distribution)
-            def imle_select_k(attrs) -> Tensor:
-                return top_k_perecent(attrs, 10)
-
-            # Initial the differentiable select k model
-            self.select_k_model = SelectK(imle_select_k)
-
-            # self.model_dict['select_k'] = self.select_k_model
-
         if explainer_type == 'attr_algo' and attr_algo in attr_algos.keys() and attr_pooling == 'mlp':
             self.model_dict['attr_pooler'] = self.attr_pooler
         elif a2r:
@@ -437,9 +428,24 @@ class LanguageModel(BaseModel):
         if self.dataset == 'cose':
             batch_size = int(batch_size / self.num_classes)
 
+
+
         prev_end = 0
         if self.e2e:
-            expls = torch.stack([self.select_k_model(attrs) for k in topk]).reshape(-1, max_length)  # stack the results
+
+            # expls = torch.stack([self.select_k_model(attrs) for k in topk]).reshape(-1, max_length)  # stack the results
+            temp = []
+            for k in topk:
+                @aimle(target_distribution=target_distribution)
+                def imle_select_k(attrs) -> Tensor:
+                    return top_k_perecent(attrs, k)
+
+                # Initial the differentiable select k model
+                self.select_k_model = SelectK(imle_select_k)
+
+                temp.append(self.select_k_model(attrs))
+            expls = torch.stack(temp).reshape(-1, max_length)  # stack the results
+
         else:
             expls = torch.stack([calc_expl(attrs, k, attn_mask) for k in topk]).reshape(-1, max_length)
         inv_expls = (1 - expls) * attn_mask.unsqueeze(0).expand(len(topk), -1, -1).reshape(-1, max_length)
