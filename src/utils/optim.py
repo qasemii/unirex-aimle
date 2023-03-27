@@ -90,15 +90,6 @@ def setup_optimizer_params(model_dict, optimizer, explainer_type, attr_pooling=N
             },
         ]
 
-    # adding imle layer to be optimized
-    if e2e:
-        optimizer_parameters += [
-            {
-                'params': [p for n, p in model_dict['select_k'].named_parameters() if any(nd in n for nd in no_decay)],
-                'weight_decay': 0.0,
-            },
-        ]
-
     return optimizer_parameters
 
 def setup_scheduler(scheduler, total_steps, optimizer):
