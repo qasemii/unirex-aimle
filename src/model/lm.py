@@ -34,7 +34,7 @@ class LanguageModel(BaseModel):
                  arch: str, dataset: str, optimizer: DictConfig, num_classes: int,
                  scheduler: DictConfig, num_freeze_layers: int = 0, freeze_epochs=-1, neg_weight=1,
                  expl_reg: bool = False, expl_reg_freq: int = 1, task_wt: float = None,
-                 train_topk: List[int] = [1, 5, 10, 20, 50], eval_topk: List[int] = [1, 5, 10, 20, 50],
+                 train_topk: int = [20], eval_topk: List[int] = [20],
                  comp_wt: float = 0.0, comp_criterion: str = None, comp_margin: float = None, comp_target: bool = False,
                  suff_wt: float = 0.0, suff_criterion: str = None, suff_margin: float = None, suff_target: bool = False,
                  log_odds: bool = False, log_odds_target: bool = False,
@@ -233,7 +233,7 @@ class LanguageModel(BaseModel):
 
             @aimle(target_distribution=target_distribution)
             def imle_select_k(attrs) -> Tensor:
-                return top_k_perecent(attrs, 10)
+                return top_k_perecent(attrs, self.topk['train'][0])
 
             # Initial the differentiable select k model
             self.select_k_model = SelectK(imle_select_k)
