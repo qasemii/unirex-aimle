@@ -28,6 +28,8 @@ from src.utils.solvers import top_k_perecent
 from imle.aimle import aimle
 from imle.target import AdaptiveTargetDistribution
 
+from memory_profiler import profiler
+
 
 class LanguageModel(BaseModel):
     def __init__(self,
@@ -422,6 +424,7 @@ class LanguageModel(BaseModel):
 
         return logits
 
+    @profiler
     def expl_forward(self, attrs, input_ids, attn_mask, targets, topk, expl_keys, mode, fresh=False, a2r=False):
         assert mode in ['loss', 'metric']
         batch_size, max_length = input_ids.shape
@@ -430,8 +433,7 @@ class LanguageModel(BaseModel):
 
         prev_end = 0
         if self.e2e:
-            # expls = torch.stack([self.select_k_model(attrs) for k in topk]).reshape(-1, max_length)  # stack the
-            # results
+            # expls = torch.stack([self.select_k_model(attrs) for k in topk]).reshape(-1, max_length)  # stack results
             temp = []
             for k in topk:
                 @aimle(target_distribution=self.target_distribution)
