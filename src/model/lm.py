@@ -28,8 +28,6 @@ from src.utils.solvers import top_k_perecent
 from imle.aimle import aimle
 from imle.target import AdaptiveTargetDistribution
 
-from memory_profiler import profiler
-
 
 class LanguageModel(BaseModel):
     def __init__(self,
@@ -424,7 +422,6 @@ class LanguageModel(BaseModel):
 
         return logits
 
-    @profiler
     def expl_forward(self, attrs, input_ids, attn_mask, targets, topk, expl_keys, mode, fresh=False, a2r=False):
         assert mode in ['loss', 'metric']
         batch_size, max_length = input_ids.shape
