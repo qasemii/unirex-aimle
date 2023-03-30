@@ -28,6 +28,8 @@ from src.utils.solvers import top_k_perecent
 from imle.aimle import aimle
 from imle.target import AdaptiveTargetDistribution
 
+from memory_profiler import profile
+
 
 class LanguageModel(BaseModel):
     def __init__(self,
@@ -624,6 +626,7 @@ class LanguageModel(BaseModel):
 
         return logits_dict, targets_dict
 
+    @profile
     def run_step(self, batch, split, batch_idx):
         input_ids = batch['input_ids']
         attn_mask = batch['attention_mask']
